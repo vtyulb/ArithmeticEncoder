@@ -31,7 +31,8 @@ AR_symbol AR_Decoder::getNextSymbol() {
         symbol++;
 
     high = low + (range * model.freq(symbol)) / model.totalFreq() - 1;
-    low = low + (range * model.freq(symbol - 1)) / model.totalFreq();
+    if (symbol != 0)
+        low = low + (range * model.freq(symbol - 1)) / model.totalFreq();
 
     while (1) {
         if (high < AR_HALF) {
