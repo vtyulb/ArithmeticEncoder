@@ -20,5 +20,6 @@ int AR_Model::totalFreq() {
 }
 
 void AR_Model::update(AR_symbol s) {
-
+    _freq[s]++;
+    _totalFreq++;
 }

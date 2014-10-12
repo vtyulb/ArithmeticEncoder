@@ -5,6 +5,7 @@ AR_Encoder::AR_Encoder() {
     low = 0;
     high = AR_MAX_VALUE;
     reverseBits = 0;
+    size = 0;
 }
 
 void AR_Encoder::putSymbol(AR_symbol s) {
@@ -17,9 +18,11 @@ void AR_Encoder::putSymbol(AR_symbol s) {
     while (true) {
         if (high < AR_HALF)
             writeBit(0);
-        else if (low >= AR_HALF)
+        else if (low >= AR_HALF) {
             writeBit(1);
-        else if (low >= AR_FIRST_QRT && high < AR_THIRD_QRT) {
+            low -= AR_HALF;
+            high -= AR_HALF;
+        } else if (low >= AR_FIRST_QRT && high < AR_THIRD_QRT) {
             reverseBits++;
             low -= AR_FIRST_QRT;
             high -= AR_THIRD_QRT;
@@ -31,6 +34,7 @@ void AR_Encoder::putSymbol(AR_symbol s) {
     }
 
     model.update(s);
+    size++;
 }
 
 void AR_Encoder::putVector(std::vector<AR_symbol> s) {
@@ -46,9 +50,9 @@ void AR_Encoder::writeBit(int bit) {
     }
 }
 
-std::vector<bool> AR_Encoder::getEncodedResult() {
+std::vector<char> AR_Encoder::getEncodedResult() {
      if (packed)
-         return res;
+         return convert(res);
      else {
          reverseBits++;
          if (low < AR_FIRST_QRT)
@@ -56,6 +60,23 @@ std::vector<bool> AR_Encoder::getEncodedResult() {
          else
              writeBit(1);
 
-         return res;
+         while (res.size() % 8)
+             res.push_back(0);
+
+         packed = true;
+
+         return convert(res);
      }
+}
+
+std::vector<char> AR_Encoder::convert(const std::vector<bool> data) {
+    std::vector<char> res;
+    res.resize(data.size() / 8 + 4, 0);
+    *(unsigned int*)res.data() = size;
+    for (int i = 0; i < data.size(); i++)
+        for (int j = 0; j < 8; j++)
+            if (data[i * 8 + j])
+                res[i + 4] |= (char)(1 << j);
+
+    return res;
 }
