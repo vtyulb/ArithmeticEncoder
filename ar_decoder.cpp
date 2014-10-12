@@ -1,6 +1,6 @@
 #include "ar_decoder.h"
 
-AR_Decoder::AR_Decoder(std::vector<char> data):
+AR_Decoder::AR_Decoder(const std::vector<char> data):
     data(data)
 {
     value = 0;

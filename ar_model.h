@@ -1,7 +1,7 @@
 #ifndef ARMODEL_H
 #define ARMODEL_H
 
-typedef unsigned char AR_symbol;
+typedef char AR_symbol;
 
 const int AR_MAX_SYMBOL = sizeof(AR_symbol) * 256 - 1;
 const int AR_CODE_VALUE_BITS = 16;
@@ -16,7 +16,7 @@ class AR_Model
     public:
         AR_Model();
 
-        double freq(AR_symbol);
+        int freq(AR_symbol);
         int totalFreq();
         void update(AR_symbol);
 

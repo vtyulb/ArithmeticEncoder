@@ -7,9 +7,9 @@ AR_Model::AR_Model() {
     _totalFreq = AR_MAX_SYMBOL + 1;
 }
 
-double AR_Model::freq(AR_symbol s) {
-    double res = 0;
-    for (int i = 0; i <= s; i++)
+int AR_Model::freq(AR_symbol s) {
+    int res = 0;
+    for (int i = 0; i <= (unsigned char)s; i++)
         res += _freq[i];
 
     return res;

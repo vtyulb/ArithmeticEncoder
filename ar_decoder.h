@@ -6,7 +6,7 @@
 
 class AR_Decoder {
     public:
-        AR_Decoder(std::vector<char> data);
+        AR_Decoder(const std::vector<char> data);
         std::vector<AR_symbol> getDecoded();
 
     private:

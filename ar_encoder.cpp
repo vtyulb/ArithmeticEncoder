@@ -1,4 +1,5 @@
 #include "ar_encoder.h"
+#include "ar_decoder.h"
 
 AR_Encoder::AR_Encoder() {
     packed = false;
@@ -25,7 +26,7 @@ void AR_Encoder::putSymbol(AR_symbol s) {
         } else if (low >= AR_FIRST_QRT && high < AR_THIRD_QRT) {
             reverseBits++;
             low -= AR_FIRST_QRT;
-            high -= AR_THIRD_QRT;
+            high -= AR_FIRST_QRT;
         } else
             break;
 
@@ -50,10 +51,10 @@ void AR_Encoder::writeBit(int bit) {
     }
 }
 
-std::vector<char> AR_Encoder::getEncodedResult() {
-     if (packed)
-         return convert(res);
-     else {
+void AR_Encoder::getEncodedResult(std::vector<char> &result) {
+     if (packed) {
+         convert(res, result);
+     } else {
          reverseBits++;
          if (low < AR_FIRST_QRT)
              writeBit(0);
@@ -65,18 +66,18 @@ std::vector<char> AR_Encoder::getEncodedResult() {
 
          packed = true;
 
-         return convert(res);
+         convert(res, result);
+//         AR_Decoder d(result);
+//         std::vector<char> test(d.getDecoded());
+//         test[0] = test[0];
      }
 }
 
-std::vector<char> AR_Encoder::convert(const std::vector<bool> data) {
-    std::vector<char> res;
+void AR_Encoder::convert(const std::vector<bool> data, std::vector<char> &res) {
     res.resize(data.size() / 8 + 4, 0);
     *(unsigned int*)res.data() = size;
     for (int i = 0; i < data.size(); i++)
         for (int j = 0; j < 8; j++)
             if (data[i * 8 + j])
                 res[i + 4] |= (char)(1 << j);
-
-    return res;
 }

@@ -10,7 +10,7 @@ class AR_Encoder {
 
         void putSymbol(AR_symbol);
         void putVector(std::vector<AR_symbol>);
-        std::vector<char> getEncodedResult();
+        void getEncodedResult(std::vector<AR_symbol> &res);
 
     private:
         std::vector<bool> res;
@@ -23,7 +23,7 @@ class AR_Encoder {
         AR_Model model;
 
         void writeBit(int bit);
-        std::vector<char> convert(const std::vector<bool> data);
+        void convert(const std::vector<bool> data, std::vector<AR_symbol> &res);
 };
 
 #endif // ARENCODER_H
