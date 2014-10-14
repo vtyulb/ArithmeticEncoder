@@ -1,4 +1,5 @@
 #include "ar_decoder.h"
+#include <stdio.h>
 
 AR_Decoder::AR_Decoder(const std::vector<char> data):
     data(data)
@@ -23,7 +24,7 @@ std::vector<AR_symbol> AR_Decoder::getDecoded() {
 }
 
 AR_symbol AR_Decoder::getNextSymbol() {
-    int range = high - low + 1;
+    long long range = high - low + 1;
     int cum = ((value - low + 1) * model.totalFreq() - 1) / range;
     AR_symbol symbol = 0;
 
