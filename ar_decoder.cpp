@@ -1,6 +1,9 @@
 #include "ar_decoder.h"
 #include <stdio.h>
 
+#include "ar_model.h"
+#include "ar_ppm_model.h"
+
 AR_Decoder::AR_Decoder(const std::vector<char> data):
     data(data)
 {
@@ -8,8 +11,15 @@ AR_Decoder::AR_Decoder(const std::vector<char> data):
     low = 0;
     high = AR_MAX_VALUE;
 
-    size = *(int*)data.data();
-    position = 8 * 4;
+    header h = *(header*)data.data();
+    size = h.size;
+
+    if (h.ppm)
+        model = new AR_PPM_Model();
+    else
+        model = new AR_Model();
+
+    position = 8 * sizeof(header);
     for (int i = 0; i < AR_CODE_VALUE_BITS; i++)
         value = value * 2 + getNextBit();
 }
@@ -25,15 +35,15 @@ std::vector<AR_symbol> AR_Decoder::getDecoded() {
 
 AR_symbol AR_Decoder::getNextSymbol() {
     long long range = high - low + 1;
-    int cum = ((value - low + 1) * model.totalFreq() - 1) / range;
+    int cum = ((value - low + 1) * model->totalFreq() - 1) / range;
     AR_symbol symbol = 0;
 
-    while (model.freq(symbol) <= cum)
+    while (model->freq(symbol) <= cum)
         symbol++;
 
-    high = low + (range * model.freq(symbol)) / model.totalFreq() - 1;
+    high = low + (range * model->freq(symbol)) / model->totalFreq() - 1;
     if (symbol != 0)
-        low = low + (range * model.freq(symbol - 1)) / model.totalFreq();
+        low = low + (range * model->freq(symbol - 1)) / model->totalFreq();
 
     while (1) {
         if (high < AR_HALF) {
@@ -54,7 +64,7 @@ AR_symbol AR_Decoder::getNextSymbol() {
         value = 2 * value + getNextBit();
     }
 
-    model.update(symbol);
+    model->update(symbol);
     return symbol;
 }
 

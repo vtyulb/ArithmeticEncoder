@@ -12,6 +12,11 @@ const unsigned int AR_THIRD_QRT = AR_FIRST_QRT * 3;
 
 #include <queue>
 
+struct header {
+    int ppm:1;
+    unsigned int size:31;
+};
+
 class AR_Model
 {
     public:

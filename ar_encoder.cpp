@@ -1,12 +1,21 @@
 #include "ar_encoder.h"
 #include "ar_decoder.h"
 
-AR_Encoder::AR_Encoder() {
+#include "ar_model.h"
+#include "ar_ppm_model.h"
+
+AR_Encoder::AR_Encoder(bool usePPM) {
     packed = false;
     low = 0;
     high = AR_MAX_VALUE;
     reverseBits = 0;
     size = 0;
+    ppm = usePPM;
+
+    if (usePPM)
+        model = new AR_PPM_Model();
+    else
+        model = new AR_Model();
 }
 
 void AR_Encoder::putSymbol(AR_symbol s) {
@@ -14,9 +23,9 @@ void AR_Encoder::putSymbol(AR_symbol s) {
         return;
 
     long long range = high - low + 1;
-    high = low + range * model.freq(s) / model.totalFreq() - 1;
+    high = low + range * model->freq(s) / model->totalFreq() - 1;
     if (s != 0)
-        low = low + range * model.freq(s - 1) / model.totalFreq();
+        low = low + range * model->freq(s - 1) / model->totalFreq();
 
     while (true) {
         if (high < AR_HALF)
@@ -36,7 +45,7 @@ void AR_Encoder::putSymbol(AR_symbol s) {
         high = high * 2 + 1;
     }
 
-    model.update(s);
+    model->update(s);
     size++;
 }
 
@@ -74,12 +83,15 @@ std::vector<char> AR_Encoder::getEncodedResult() {
 
 std::vector<char> AR_Encoder::convert(const std::vector<bool> data) {
     std::vector<char> res;
-    res.resize(data.size() / 8 + 4, 0);
-    *(unsigned int*)res.data() = size;
+    header h;
+    h.ppm = ppm;
+    h.size = size;
+    res.resize(data.size() / 8 + sizeof(header), 0);
+    *(header*)res.data() = h;
     for (int i = 0; i < res.size(); i++)
         for (int j = 0; j < 8; j++)
             if (data[i * 8 + j])
-                res[i + 4] |= (char)(1 << j);
+                res[i + sizeof(header)] |= (char)(1 << j);
 
     return res;
 }

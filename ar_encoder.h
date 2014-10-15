@@ -6,7 +6,7 @@
 
 class AR_Encoder {
     public:
-        AR_Encoder();
+        AR_Encoder(bool usePPM);
 
         void putSymbol(AR_symbol);
         void putVector(std::vector<AR_symbol>);
@@ -20,7 +20,8 @@ class AR_Encoder {
         unsigned int low;
         unsigned int high;
         int reverseBits;
-        AR_Model model;
+        AR_Model *model;
+        bool ppm;
 
         void writeBit(int bit);
         std::vector<char> convert(const std::vector<bool> data);
