@@ -1,22 +1,22 @@
-#include "ar_model.h"
+#include "ar_normal_model.h"
 
-AR_Model::AR_Model() {
-    for (int i = 0; i <= AR_MAX_SYMBOL; i++)
+AR_Normal_Model::AR_Normal_Model() {
+    for (int i = 0; i < AR_TOTAL_SYMBOLS; i++)
         _freq[i] = 1;
 
-    _totalFreq = AR_MAX_SYMBOL + 1;
+    _totalFreq = AR_TOTAL_SYMBOLS;
     update(32);
 }
 
-int AR_Model::freq(AR_symbol s) {
+int AR_Normal_Model::freq(AR_symbol s) {
     return _cumFreq[s];
 }
 
-int AR_Model::totalFreq() {
+int AR_Normal_Model::totalFreq() {
     return _totalFreq;
 }
 
-void AR_Model::update(AR_symbol s) {
+void AR_Normal_Model::update(AR_symbol s) {
     static int count = 0;
     const int diff = 5;
     count++;
@@ -34,7 +34,7 @@ void AR_Model::update(AR_symbol s) {
 
     if (_totalFreq >= AR_FIRST_QRT) {
         _totalFreq = 0;
-        for (int i = 0; i <= AR_MAX_SYMBOL; i++) {
+        for (int i = 0; i < AR_TOTAL_SYMBOLS; i++) {
             _freq[i] /= 2;
             if (_freq[i] == 0)
                 _freq[i] = 1;
@@ -44,6 +44,6 @@ void AR_Model::update(AR_symbol s) {
     }
 
     _cumFreq[0] = _freq[0];
-    for (int i = 1; i <= AR_MAX_SYMBOL; i++)
+    for (int i = 1; i < AR_TOTAL_SYMBOLS; i++)
         _cumFreq[i] = _cumFreq[i - 1] + _freq[i];
 }

@@ -2,6 +2,7 @@
 #include "ar_decoder.h"
 
 #include "ar_model.h"
+#include "ar_normal_model.h"
 #include "ar_ppm_model.h"
 
 AR_Encoder::AR_Encoder(bool usePPM) {
@@ -15,7 +16,7 @@ AR_Encoder::AR_Encoder(bool usePPM) {
     if (usePPM)
         model = new AR_PPM_Model();
     else
-        model = new AR_Model();
+        model = new AR_Normal_Model();
 }
 
 void AR_Encoder::putSymbol(AR_symbol s) {

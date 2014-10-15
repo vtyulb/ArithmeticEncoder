@@ -3,6 +3,7 @@
 
 #include "ar_model.h"
 #include "ar_ppm_model.h"
+#include "ar_normal_model.h"
 
 AR_Decoder::AR_Decoder(const std::vector<char> data):
     data(data)
@@ -17,7 +18,7 @@ AR_Decoder::AR_Decoder(const std::vector<char> data):
     if (h.ppm)
         model = new AR_PPM_Model();
     else
-        model = new AR_Model();
+        model = new AR_Normal_Model();
 
     position = 8 * sizeof(header);
     for (int i = 0; i < AR_CODE_VALUE_BITS; i++)
