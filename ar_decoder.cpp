@@ -36,7 +36,7 @@ std::vector<AR_symbol> AR_Decoder::getDecoded() {
 
 AR_symbol AR_Decoder::getNextSymbol() {
     long long range = high - low + 1;
-    int cum = ((value - low + 1) * model->totalFreq() - 1) / range;
+    int cum = ((value - low + 1) * (long long)model->totalFreq() - 1) / range;
     AR_symbol symbol = 0;
 
     while (model->freq(symbol) <= cum)

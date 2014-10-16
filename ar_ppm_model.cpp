@@ -5,17 +5,20 @@
 
 AR_PPM_Model::AR_PPM_Model() {
     for (int i = 0; i < AR_PPM_MODEL_ORDER; i++)
-        lastSymbols.push_back(0);
+        lastSymbols.push_back(32);
 
     cached = false;
 }
 
 void AR_PPM_Model::update(AR_symbol s) {
-    int *block = getCurrentBlock();
+    for (int i = 0; i < AR_PPM_MODEL_ORDER; i++) {
+        int *block = getCurrentBlock(i);
+        block[s] += AR_PPM_MODEL_AGRO / (AR_PPM_MODEL_ORDER - i);
+    }
+
     lastSymbols.push_back(s);
     lastSymbols.pop_front();
 
-    block[s] += AR_PPM_MODEL_AGRO;
     cached = false;
 }
 
@@ -34,7 +37,7 @@ int AR_PPM_Model::totalFreq() {
 }
 
 void AR_PPM_Model::cacheIt() {
-    int *block = getCurrentBlock();
+    int *block = getCurrentBlock(AR_PPM_MODEL_ORDER - 1);
 
     cumFreq[0] = block[0];
     for (int i = 1; i < AR_TOTAL_SYMBOLS; i++)
@@ -51,10 +54,11 @@ void AR_PPM_Model::cacheIt() {
         cached = true;
 }
 
-int *AR_PPM_Model::getCurrentBlock() {
+int *AR_PPM_Model::getCurrentBlock(int order) {
     std::list<AR_symbol>::iterator it = lastSymbols.begin();
 
     struct index i;
+    i.order = order;
     for (int j = 0; j < AR_PPM_MODEL_ORDER; j++)
         i.r[j] = *(it++);
 
@@ -68,4 +72,13 @@ int *AR_PPM_Model::getCurrentBlock() {
     }
 
     return table[i];
+}
+
+void AR_PPM_Model::resetModel() {
+    std::map<struct index, int* >::iterator i = table.begin();
+    while (i != table.end())
+        delete (*(i++)).second;
+
+    table.clear();
+    cached = false;
 }

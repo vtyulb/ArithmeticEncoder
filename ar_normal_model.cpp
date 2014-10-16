@@ -1,11 +1,7 @@
 #include "ar_normal_model.h"
 
 AR_Normal_Model::AR_Normal_Model() {
-    for (int i = 0; i < AR_TOTAL_SYMBOLS; i++)
-        _freq[i] = 1;
-
-    _totalFreq = AR_TOTAL_SYMBOLS;
-    update(32);
+    resetModel();
 }
 
 int AR_Normal_Model::freq(AR_symbol s) {
@@ -46,4 +42,12 @@ void AR_Normal_Model::update(AR_symbol s) {
     _cumFreq[0] = _freq[0];
     for (int i = 1; i < AR_TOTAL_SYMBOLS; i++)
         _cumFreq[i] = _cumFreq[i - 1] + _freq[i];
+}
+
+void AR_Normal_Model::resetModel() {
+    for (int i = 0; i < AR_TOTAL_SYMBOLS; i++)
+        _freq[i] = 1;
+
+    _totalFreq = AR_TOTAL_SYMBOLS;
+    update(32);
 }

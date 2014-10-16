@@ -12,6 +12,7 @@ class AR_Normal_Model : public AR_Model
         int freq(AR_symbol);
         int totalFreq();
         void update(AR_symbol);
+        void resetModel();
 
     private:
         int _freq[AR_TOTAL_SYMBOLS];

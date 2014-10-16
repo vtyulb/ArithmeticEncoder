@@ -5,14 +5,20 @@
 #include <list>
 #include <map>
 
-const int AR_PPM_MODEL_ORDER = 3;
-const int AR_PPM_MODEL_AGRO = 4;
+const int AR_PPM_MODEL_ORDER = 5;
+const int AR_PPM_MODEL_AGRO = 100;
 
 struct index {
     int r[AR_PPM_MODEL_ORDER];
+    int order = AR_PPM_MODEL_ORDER;
 
     bool operator < (const index &i) const {
-        for (int j = 0; j < AR_PPM_MODEL_ORDER; j++)
+        if (order < i.order)
+            return true;
+        else if (order > i.order)
+            return false;
+
+        for (int j = AR_PPM_MODEL_ORDER - 1; j > AR_PPM_MODEL_ORDER - order - 1; j--)
             if (r[j] < i.r[j])
                 return true;
             else if (r[j] > i.r[j])
@@ -29,6 +35,7 @@ class AR_PPM_Model : public AR_Model {
         int freq(AR_symbol);
         int totalFreq();
         void update(AR_symbol);
+        void resetModel();
 
     private:
         std::list<AR_symbol> lastSymbols;
@@ -41,7 +48,7 @@ class AR_PPM_Model : public AR_Model {
         //end of cache block
 
         void cacheIt();
-        int *getCurrentBlock();
+        int *getCurrentBlock(int order);
 
 };
 
