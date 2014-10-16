@@ -37,10 +37,7 @@ std::vector<AR_symbol> AR_Decoder::getDecoded() {
 AR_symbol AR_Decoder::getNextSymbol() {
     long long range = high - low + 1;
     int cum = ((value - low + 1) * (long long)model->totalFreq() - 1) / range;
-    AR_symbol symbol = 0;
-
-    while (model->freq(symbol) <= cum)
-        symbol++;
+    AR_symbol symbol = findSymbol(cum);
 
     high = low + (range * model->freq(symbol)) / model->totalFreq() - 1;
     if (symbol != 0)
@@ -76,4 +73,16 @@ int AR_Decoder::getNextBit() {
     int res = data[position / 8] == (data[position / 8] | (1 << (position % 8)));
     position++;
     return res;
+}
+
+AR_symbol AR_Decoder::findSymbol(int cum) {
+    int left = -1;
+    int right = AR_TOTAL_SYMBOLS - 1;
+    while (left < right - 1)
+        if (model->freq(AR_symbol((left + right) / 2)) <= cum)
+            left = (left + right) / 2;
+        else
+            right = (left + right) / 2;
+
+    return AR_symbol(right);
 }

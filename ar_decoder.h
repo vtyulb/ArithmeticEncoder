@@ -21,6 +21,7 @@ class AR_Decoder {
 
         AR_symbol getNextSymbol();
         int getNextBit();
+        AR_symbol findSymbol(int cum);
 };
 
 #endif // AR_DECODER_H
