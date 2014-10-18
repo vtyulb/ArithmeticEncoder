@@ -7,14 +7,14 @@
 class AR_Decoder {
     public:
         AR_Decoder(const std::vector<char> data);
-        std::vector<AR_symbol> getDecoded();
+        std::vector<char> getDecoded();
 
     private:
         unsigned int low;
         unsigned int high;
         unsigned int value;
         int size;
-        long long position;
+        unsigned long long position;
         AR_Model *model;
 
         std::vector<char> data;
@@ -22,6 +22,6 @@ class AR_Decoder {
         AR_symbol getNextSymbol();
         int getNextBit();
         AR_symbol findSymbol(int cum);
-};
+};\
 
 #endif // AR_DECODER_H

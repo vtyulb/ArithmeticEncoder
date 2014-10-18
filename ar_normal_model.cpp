@@ -17,16 +17,8 @@ void AR_Normal_Model::update(AR_symbol s) {
     const int diff = 5;
     count++;
 
-    window.push(s);
-
     _freq[s] += diff;
     _totalFreq += diff;
-
-    if (count > 2000) {
-        _freq[window.front()] -= diff;
-        _totalFreq -= diff;
-        window.pop();
-    }
 
     if (_totalFreq >= AR_FIRST_QRT) {
         _totalFreq = 0;

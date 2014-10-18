@@ -5,16 +5,17 @@
 #include "ar_normal_model.h"
 #include "ar_ppm_model.h"
 
-AR_Encoder::AR_Encoder(bool usePPM) {
+AR_Encoder::AR_Encoder(bool usePPM, bool isTXT) {
     packed = false;
     low = 0;
     high = AR_MAX_VALUE;
     reverseBits = 0;
     size = 0;
     ppm = usePPM;
+    txt = isTXT;
 
     if (usePPM)
-        model = new AR_PPM_Model();
+        model = new AR_PPM_Model(txt);
     else
         model = new AR_Normal_Model();
 }
@@ -46,12 +47,16 @@ void AR_Encoder::putSymbol(AR_symbol s) {
         high = high * 2 + 1;
     }
 
-    model->update(s);
-    size++;
+    if (s == 256)
+        model->resetModel();
+    else {
+        model->update(s);
+        size++;
+    }
 }
 
 void AR_Encoder::putVector(std::vector<AR_symbol> s) {
-    for (int i = 0; i < s.size(); i++)
+    for (unsigned i = 0; i < s.size(); i++)
         putSymbol(s[i]);
 }
 
@@ -78,18 +83,20 @@ std::vector<char> AR_Encoder::getEncodedResult() {
 
          packed = true;
 
+         model->resetModel();
          return convert(res);
      }
 }
 
-std::vector<char> AR_Encoder::convert(const std::vector<bool> data) {
+std::vector<char> AR_Encoder::convert(const std::vector<bool> &data) {
     std::vector<char> res;
     header h;
     h.ppm = ppm;
+    h.txt = txt;
     h.size = size;
     res.resize(data.size() / 8 + sizeof(header), 0);
     *(header*)res.data() = h;
-    for (int i = 0; i < res.size(); i++)
+    for (unsigned i = 0; i < res.size(); i++)
         for (int j = 0; j < 8; j++)
             if (data[i * 8 + j])
                 res[i + sizeof(header)] |= (char)(1 << j);

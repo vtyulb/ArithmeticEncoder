@@ -6,7 +6,9 @@
 #include <map>
 
 const int AR_PPM_MODEL_ORDER = 5;
-const int AR_PPM_MODEL_AGRO = 100;
+const int AR_PPM_MODEL_AGRO = 300;
+
+const long long AR_MAX_MEMORY_USAGE = 1000; // in megabytes
 
 struct index {
     int r[AR_PPM_MODEL_ORDER];
@@ -30,7 +32,7 @@ struct index {
 
 class AR_PPM_Model : public AR_Model {
     public:
-        AR_PPM_Model();
+        AR_PPM_Model(bool txt);
 
         int freq(AR_symbol);
         int totalFreq();
@@ -39,7 +41,7 @@ class AR_PPM_Model : public AR_Model {
 
     private:
         std::list<AR_symbol> lastSymbols;
-        std::map<index, int* > table;
+        std::map<index, long long* > table;
 
         //cache block
         int cumFreq[AR_TOTAL_SYMBOLS];
@@ -47,8 +49,13 @@ class AR_PPM_Model : public AR_Model {
         int _totalFreq;
         //end of cache block
 
+        long long ticks;
+        int memoryUsage;
+        int ML;
+
+
         void cacheIt();
-        int *getCurrentBlock(int order);
+        long long *getCurrentBlock(int order);
 
 };
 

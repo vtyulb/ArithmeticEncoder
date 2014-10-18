@@ -16,7 +16,7 @@ AR_Decoder::AR_Decoder(const std::vector<char> data):
     size = h.size;
 
     if (h.ppm)
-        model = new AR_PPM_Model();
+        model = new AR_PPM_Model(h.txt);
     else
         model = new AR_Normal_Model();
 
@@ -25,11 +25,13 @@ AR_Decoder::AR_Decoder(const std::vector<char> data):
         value = value * 2 + getNextBit();
 }
 
-std::vector<AR_symbol> AR_Decoder::getDecoded() {
-    std::vector<AR_symbol> res;
+std::vector<char> AR_Decoder::getDecoded() {
+    std::vector<char> res;
     res.resize(size);
     for (int i = 0; i < size; i++)
         res[i] = getNextSymbol();
+
+    model->resetModel();
 
     return res;
 }
@@ -62,7 +64,12 @@ AR_symbol AR_Decoder::getNextSymbol() {
         value = 2 * value + getNextBit();
     }
 
-    model->update(symbol);
+    if (symbol == 256) {
+        model->resetModel();
+        return getNextSymbol();
+    } else
+        model->update(symbol);
+
     return symbol;
 }
 

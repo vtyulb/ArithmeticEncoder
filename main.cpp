@@ -25,15 +25,101 @@ void showHelp() {
     exit(0);
 }
 
-int main(int argc, char *argv[]) {
+void compress(FILE *in, FILE *out, int ppm) {
+    std::vector<AR_symbol> data;
+    int ch;
+    while ((ch = getc(in)) != EOF)
+        data.push_back((unsigned char)(ch));
 
+
+    const int blck = 512;
+    const int diff = 50;
+
+    int *prev = new  int[256];
+    int *current = new int[256];
+    double *rt = new double[data.size() / blck];
+    rt[0] = 0;
+
+    for (unsigned i = 1; i < data.size() / blck - 1; i++) {
+        for (int j = 0; j < 256; j++) {
+            prev[j] = 0;
+            current[j] = 0;
+        }
+
+        for (unsigned j = (i - 1) * blck; j < i * blck; j++)
+            prev[data[j]]++;
+
+        for (unsigned j = (i * blck); j < (i + 1) * blck; j++)
+            current[data[j]]++;
+
+        double res = 0;
+        for (int j = 0; j < 256; j++)
+            res += (prev[j] - current[j]) * (prev[j] - current[j]) / 1000.0;
+
+        rt[i] = res;
+    }
+
+//    for (int i = 1; i < data.size() / blck - 1; i++)
+//        if (rt[i] > diff)
+//            fprintf(stderr, "blck %d: %.3g\n", i, rt[i]);
+
+    for (unsigned i = 0; i < data.size(); i++)
+        current[data[i]]++;
+
+    bool txt = false;
+    if (current[32] > data.size() / 40) {
+        txt = true;
+//        fprintf(stderr, "txt file!");
+    }
+
+    AR_Encoder e(ppm, txt);
+
+    for (unsigned i = 0; i < data.size(); i++) {
+        if (rt[i / blck] > diff && i % blck == 0)
+            e.putSymbol(256);
+
+        e.putSymbol(data[i]);
+    }
+    std::vector<char> res(e.getEncodedResult());
+
+    fwrite(res.data(), 1, res.size(), out);
+    fclose(out);
+//    exit(0);
+}
+
+void decompress(FILE *in, FILE *out) {
+    std::vector<char> data;
+    int ch;
+    while ((ch = getc(in)) != EOF)
+        data.push_back(ch);
+
+    AR_Decoder d(data);
+    std::vector<char> decoded(d.getDecoded());
+
+    fwrite(decoded.data(), 1, decoded.size(), out);
+    fclose(out);
+//    exit(0);
+}
+
+int main(int argc, char *argv[]) {
+    FILE *fin = fopen(argv[2], "r");
+    FILE *fout = fopen(argv[3], "w");
+    int ppm = (strcmp(argv[4], "ppm") == 0);
+
+    if (argv[1][0] == 'c')
+        compress(fin, fout, ppm);
+    else
+        decompress(fin, fout);
+
+
+    /*
     std::string output;
     std::string input;
 
     po::options_description desc("General options");
     desc.add_options()
             ("compress,c", "Compress target")
-            ("unpack,u", "Unpack target")
+            ("decompress,d", "Decompress target")
             ("input,i", po::value<std::string>(&input), "Input (defaults to stdin)")
             ("output,o", po::value<std::string>(&output), "Output (defaults to stdout)")
             ("ppm,p", "Use powerfull PPM compression")
@@ -63,36 +149,17 @@ int main(int argc, char *argv[]) {
         in = stdin;
 
     if (vm.count("compress")) {
-        AR_Encoder e(vm.count("ppm"));
-        int ch;
-        while ((ch = getc(in)) != EOF)
-            e.putSymbol((char)ch);
-
-        std::vector<char> res = e.getEncodedResult();
-
-        fwrite(res.data(), sizeof(AR_symbol), res.size(), out);
-        fclose(out);
-
+        compress(in, out, vm.count("ppm"));
         return 0;
     }
 
-    if (vm.count("unpack")) {
-        std::vector<char> data;
-        int ch;
-        while ((ch = getc(in)) != EOF)
-            data.push_back(ch);
-
-        AR_Decoder d(data);
-        std::vector<AR_symbol> decoded = d.getDecoded();
-
-        fwrite(decoded.data(), sizeof(AR_symbol), decoded.size(), out);
-        fclose(out);
-
+    if (vm.count("decompress")) {
+        decompress(in, out);
         return 0;
     }
 
     printf("Target did't recognized. Displaying standart help.\n");
-    showHelp();
+    showHelp();*/
 
     return 0;
 }
