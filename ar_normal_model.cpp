@@ -9,7 +9,7 @@ int AR_Normal_Model::freq(AR_symbol s) {
 }
 
 int AR_Normal_Model::totalFreq() {
-    return _totalFreq;
+    return _cumFreq[AR_TOTAL_SYMBOLS - 1];
 }
 
 void AR_Normal_Model::update(AR_symbol s) {
@@ -18,28 +18,25 @@ void AR_Normal_Model::update(AR_symbol s) {
     count++;
 
     _freq[s] += diff;
-    _totalFreq += diff;
 
-    if (_totalFreq >= AR_FIRST_QRT) {
-        _totalFreq = 0;
+    if (_cumFreq[AR_TOTAL_SYMBOLS - 1] >= AR_FIRST_QRT) {
         for (int i = 0; i < AR_TOTAL_SYMBOLS; i++) {
             _freq[i] /= 2;
             if (_freq[i] == 0)
                 _freq[i] = 1;
-
-            _totalFreq += _freq[i];
         }
     }
 
     _cumFreq[0] = _freq[0];
     for (int i = 1; i < AR_TOTAL_SYMBOLS; i++)
         _cumFreq[i] = _cumFreq[i - 1] + _freq[i];
+
+    _cumFreq[AR_TOTAL_SYMBOLS - 1] = _cumFreq[AR_TOTAL_SYMBOLS - 2];
 }
 
 void AR_Normal_Model::resetModel() {
     for (int i = 0; i < AR_TOTAL_SYMBOLS; i++)
         _freq[i] = 1;
 
-    _totalFreq = AR_TOTAL_SYMBOLS;
     update(32);
 }

@@ -39,6 +39,9 @@ std::vector<int> getSections(std::vector<unsigned char> dataVect) {
         return res;
 
     int offset = *(int*)(data + 0x3C);
+    if (offset > dataVect.size())
+        return res;
+
     IMAGE_NT_HEADER h;
     h = *(IMAGE_NT_HEADER*)(data + offset);
 

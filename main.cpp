@@ -48,12 +48,13 @@ void compress(FILE *in, FILE *out, int ppm) {
     AR_Encoder e(ppm, txt);
 
     for (unsigned i = 0; i < data.size(); i++) {
-        for (int j = 0; j < sections.size(); j++)
-            if (sections[j] == i) {
-                e.putSymbol(256);
-                fprintf(stderr, "flush %d\n", i);
-                break;
-            }
+        if (ppm)
+            for (int j = 0; j < sections.size(); j++)
+                if (sections[j] == i) {
+                    e.putSymbol(256);
+                    fprintf(stderr, "flush %d\n", i);
+                    break;
+                }
 
         e.putSymbol(data[i]);
     }
