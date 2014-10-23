@@ -10,6 +10,8 @@
 #include "ar_encoder.h"
 #include "ar_decoder.h"
 
+#include "dllparser.h"
+
 namespace po=boost::program_options;
 
 void showHelp() {
@@ -26,57 +28,32 @@ void showHelp() {
 }
 
 void compress(FILE *in, FILE *out, int ppm) {
-    std::vector<AR_symbol> data;
+    std::vector<unsigned char> data;
     int ch;
     while ((ch = getc(in)) != EOF)
         data.push_back((unsigned char)(ch));
 
-
-    const int blck = 512;
-    const int diff = 50;
-
-    int *prev = new  int[256];
-    int *current = new int[256];
-    double *rt = new double[data.size() / blck];
-    rt[0] = 0;
-
-    for (unsigned i = 1; i < data.size() / blck - 1; i++) {
-        for (int j = 0; j < 256; j++) {
-            prev[j] = 0;
-            current[j] = 0;
-        }
-
-        for (unsigned j = (i - 1) * blck; j < i * blck; j++)
-            prev[data[j]]++;
-
-        for (unsigned j = (i * blck); j < (i + 1) * blck; j++)
-            current[data[j]]++;
-
-        double res = 0;
-        for (int j = 0; j < 256; j++)
-            res += (prev[j] - current[j]) * (prev[j] - current[j]) / 1000.0;
-
-        rt[i] = res;
-    }
-
-//    for (int i = 1; i < data.size() / blck - 1; i++)
-//        if (rt[i] > diff)
-//            fprintf(stderr, "blck %d: %.3g\n", i, rt[i]);
-
+    int spaces = 0;
     for (unsigned i = 0; i < data.size(); i++)
-        current[data[i]]++;
+        spaces += (data[i] == 32);
 
     bool txt = false;
-    if (current[32] > data.size() / 40) {
+    if (spaces > data.size() / 40) {
         txt = true;
 //        fprintf(stderr, "txt file!");
     }
 
+    std::vector<int> sections = getSections(data);
+
     AR_Encoder e(ppm, txt);
 
     for (unsigned i = 0; i < data.size(); i++) {
-        if (rt[i / blck] > diff && i % blck == 0)
-            e.putSymbol(256);
+        for (int j = 0; j < sections.size(); j++)
+            if (sections[j] == i) {
+                e.putSymbol(256);
+                fprintf(stderr, "flush %d\n", i);
+                break;
+            }
 
         e.putSymbol(data[i]);
     }

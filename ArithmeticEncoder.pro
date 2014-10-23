@@ -20,11 +20,13 @@ SOURCES += main.cpp \
     ar_encoder.cpp \
     ar_decoder.cpp \
     ar_ppm_model.cpp \
-    ar_normal_model.cpp
+    ar_normal_model.cpp \
+    dllparser.cpp
 
 HEADERS += \
     ar_model.h \
     ar_encoder.h \
     ar_decoder.h \
     ar_ppm_model.h \
-    ar_normal_model.h
+    ar_normal_model.h \
+    dllparser.h

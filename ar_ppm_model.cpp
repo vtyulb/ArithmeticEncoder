@@ -28,7 +28,7 @@ void AR_PPM_Model::update(AR_symbol s) {
     ticks++;
 
     if (ML == 0 && memoryUsage > AR_MAX_MEMORY_USAGE * 1024 * 1024)
-        ML = 1;
+        ML = 2;
 }
 
 int AR_PPM_Model::freq(AR_symbol s) {

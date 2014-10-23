@@ -14,7 +14,7 @@ int AR_Normal_Model::totalFreq() {
 
 void AR_Normal_Model::update(AR_symbol s) {
     static int count = 0;
-    const int diff = 5;
+    const int diff = 6;
     count++;
 
     _freq[s] += diff;
