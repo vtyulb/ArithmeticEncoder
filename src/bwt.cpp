@@ -1,117 +1,106 @@
 #include "bwt.h"
 #include <algorithm>
+#include <memory.h>
 #include <vector>
+#include <stdio.h>
 
-namespace {
-    const unsigned int module =  655360001;
-
-    std::vector<unsigned long long> hashes1;
-    std::vector<unsigned long long> h1;
-    std::vector<unsigned long long> hashes2;
-    std::vector<unsigned long long> h2;
-    std::vector<char> *r;
-
-    unsigned long long calc1(int a, int count) {
-        if (a == 0)
-            return hashes1[a + count - 1];
-
-        return hashes1[a + count - 1] - hashes1[a - 1] * h1[count];
-    }
-
-    unsigned long long calc2(int a, int count) {
-        if (a == 0)
-            return hashes2[a + count - 1];
-
-        return (hashes2[a + count - 1] - hashes2[a - 1] * h2[count] + module) % module;
-    }
-
-    bool equal(int a, int b, int count) {
-        if (count == 0)
-            return true;
-
-        if (calc1(a, count) != calc1(b, count))
-            return false;
-
-        return true;
-    }
-
-    bool lesser(int a, int b) {
-        int left = 0;
-        int right = r->size() / 2;
-
-        while (left < right - 1)
-            if (equal(a, b, (left + right) / 2))
-                left = (left + right) / 2;
-            else
-                right = (left + right) / 2;
-
-        return r->at(a + left) < r->at(b + left);
-    }
-}
+//namespace {
+//    void sortIt(int *target, int *destination, )
+//}
 
 std::vector<char> BWT_Direct(std::vector<char> data) {
     int N = data.size();
 
-    int *res = new int[N];
+//    int *p = new int[N];
+//    int *c = new int[N];
+//    int *cnt = new int[N];
+//    int *pn = new int[N];
+//    int *cn = new int[N];
+    std::vector<int> p(N), c(N), cnt(256 + N), pn(N), cn(N);
 
-    for (int i = 0; i < N; i++) {
-        res[i] = i;
-        data.push_back(data[i]);
+    memset(cnt.data(), 0, sizeof(int) * 256);
+    for (int i = 0; i < N; i++)
+        cnt[(unsigned char)data[i]]++;
+
+    for (int i = 1; i < 256; i++)
+        cnt[i] += cnt[i - 1];
+
+    for (int i = 0; i < N; i++)
+        p[--cnt[(unsigned char)data[i]]] = i;
+
+    int classes = 0;
+    c[p[0]] = classes++;
+    for (int i = 1; i < N; i++) {
+        if (data[p[i]] != data[p[i - 1]])
+            classes++;
+
+        c[p[i]] = classes - 1;
     }
 
+    for (int stage = 0; (1 << stage) < N; stage++) {
+        for (int i = 0; i < N; i++)
+            pn[i] = (p[i] - (1 << stage) + N) % N;
 
-    hashes1.push_back(data[0] + int(1));
-    hashes2.push_back(data[0] + int(1));
-    h1.push_back(1);
-    h2.push_back(1);
-    for (int i = 1; i < N * 2; i++) {
-        hashes1.push_back(hashes1[i - 1] * 999999937 + data[i] + 1);
-        hashes2.push_back((hashes2[i - 1] * 337) % module + data[i] + 1);
-        hashes2[i] %= module;
-        h1.push_back(h1[i - 1] * 999999937);
-        h2.push_back(h2[i - 1] * 337);
+        memset(cnt.data(), 0, sizeof(int) * classes);
+        for (int i = 0; i < N; i++)
+            cnt[c[pn[i]]]++;
+
+        for (int i = 1; i < N; i++)
+            cnt[i] += cnt[i - 1];
+
+        for (int i = N - 1; i >= 0; i--)
+            p[--cnt[c[pn[i]]]] = pn[i];
+
+        classes = 0;
+        cn[p[0]] = classes++;
+        for (int i = 1; i < N; i++) {
+            if (c[p[i - 1]] != c[p[i]])
+                classes++;
+            else if (c[(p[i - 1] + (1 << stage)) % N] != c[(p[i] + (1 << stage)) % N])
+                classes++;
+
+            cn[p[i]] = classes - 1;
+        }
+        memcpy(c.data(), cn.data(), sizeof(int) * N);
     }
 
-    r = &data;
-    std::sort(res, res + N, lesser);
-
-    hashes1.clear();
-    hashes2.clear();
-    h1.clear();
-    h2.clear();
-
-    std::vector<char> result;
+    std::vector<char> res;
     for (int i = 0; i < N; i++)
-        result.push_back(data[res[i] + N - 1]);
+        res.push_back(data[(p[i] + N - 1 + N) % N]);
 
-    result.resize(result.size() + 4);
+    res.resize(res.size() + sizeof(int));
     for (int i = 0; i < N; i++)
-        if (res[i] == 0)
-            *(int*)(result.data() + N) = i;
+        if (p[i] == 0)
+            *(int*)(res.data() + res.size() - sizeof(int)) = i;
 
-    delete res;
-    return result;
+    /*std::vector<char> check = BWT_Backward(res);
+    for (int i = 0; i < data.size(); i++)
+        if (check[i] != data[i]) {
+            printf("err %d: %d %d\n", i, check[i], data[i]);
+        }*/
+
+    return res;
 }
 
 std::vector<char> BWT_Backward(std::vector<char> data) {
-    int x = *(int*)(data.data() + data.size() - 4);
+    int x = *(int*)(data.data() + data.size() - sizeof(int));
 
     data.resize(data.size() - 4);
 
-    int r[257];
-    for (int i = 0; i < 256; i++)
-        r[i] = 0;
+    int r[256];
+    memset(r, 0, 256 * sizeof(int));
 
     for (int i = 0; i < data.size(); i++)
         r[(unsigned char)data[i]]++;
 
-    int k = 0;
-    for (int i = 0; i < 256; i++) {
+    int k = r[0];
+    for (int i = 0; i < 255; i++) {
         int t = r[i + 1];
         r[i + 1] += r[i];
         r[i] -= k;
         k = t;
     }
+    r[255] -= k;
 
     std::vector<int> magic;
     magic.resize(data.size());

@@ -28,11 +28,11 @@ void showHelp() {
     exit(0);
 }
 
-void compress(FILE *in, FILE *out, int ppm) {
-    std::vector<unsigned char> data;
+void compress(FILE *in, FILE *out, int ppm, int bwt) {
+    std::vector<char> data;
     int ch;
     while ((ch = getc(in)) != EOF)
-        data.push_back((unsigned char)(ch));
+        data.push_back((unsigned char)ch);
 
     int spaces = 0;
     for (unsigned i = 0; i < data.size(); i++)
@@ -46,24 +46,27 @@ void compress(FILE *in, FILE *out, int ppm) {
 
     std::vector<int> sections = getSections(data);
 
-    AR_Encoder e(ppm, txt);
+    AR_Encoder e(ppm, txt, bwt);
+
+    if (bwt)
+        data = BWT_Direct(data);
 
     for (unsigned i = 0; i < data.size(); i++) {
         if (ppm)
             for (int j = 0; j < sections.size(); j++)
                 if (sections[j] == i) {
                     e.putSymbol(256);
-                    fprintf(stderr, "flush %d\n", i);
+//                    fprintf(stderr, "flush %d\n", i);
                     break;
                 }
 
-        e.putSymbol(data[i]);
+        e.putSymbol((unsigned char)data[i]);
     }
     std::vector<char> res(e.getEncodedResult());
 
     fwrite(res.data(), 1, res.size(), out);
     fclose(out);
-//    exit(0);
+    exit(0);
 }
 
 void decompress(FILE *in, FILE *out) {
@@ -77,27 +80,15 @@ void decompress(FILE *in, FILE *out) {
 
     fwrite(decoded.data(), 1, decoded.size(), out);
     fclose(out);
-//    exit(0);
+    exit(0);
 }
 
 int main(int argc, char *argv[]) {
-    std::vector<char> t;
-    for (int i = 0; i < 100; i++)
-        t.push_back(rand());
-
-    std::vector<char> res = BWT_Backward(BWT_Direct(t));
-    for (int i = 0; i < res.size(); i++)
-        if (res[i] != t[i])
-            printf("err %d: %d %d\n", i, res[i], t[i]);
-
-    exit(0);
-
     FILE *fin = fopen(argv[2], "r");
     FILE *fout = fopen(argv[3], "w");
-    int ppm = (strcmp(argv[4], "ppm") == 0);
 
     if (argv[1][0] == 'c')
-        compress(fin, fout, ppm);
+        compress(fin, fout, strstr(argv[4], "ppm") != NULL, strstr(argv[4], "bwt") != NULL);
     else
         decompress(fin, fout);
 

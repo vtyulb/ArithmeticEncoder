@@ -31,7 +31,7 @@ struct SECTION {
     unsigned int characteristics;
 };
 
-std::vector<int> getSections(std::vector<unsigned char> dataVect) {
+std::vector<int> getSections(std::vector<char> dataVect) {
     char *data = (char*) dataVect.data();
 
     std::vector<int> res;

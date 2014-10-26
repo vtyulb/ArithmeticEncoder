@@ -4,6 +4,7 @@
 #include "ar_model.h"
 #include "ar_ppm_model.h"
 #include "ar_normal_model.h"
+#include "bwt.h"
 
 AR_Decoder::AR_Decoder(const std::vector<char> data):
     data(data)
@@ -14,11 +15,12 @@ AR_Decoder::AR_Decoder(const std::vector<char> data):
 
     header h = *(header*)data.data();
     size = h.size;
+    bwt = h.bwt;
 
     if (h.ppm)
         model = new AR_PPM_Model(h.txt);
     else
-        model = new AR_Normal_Model();
+        model = new AR_Normal_Model(bwt);
 
     position = 8 * sizeof(header);
     for (int i = 0; i < AR_CODE_VALUE_BITS; i++)
@@ -32,6 +34,9 @@ std::vector<char> AR_Decoder::getDecoded() {
         res[i] = getNextSymbol();
 
     model->resetModel();
+
+    if (bwt)
+        return BWT_Backward(res);
 
     return res;
 }

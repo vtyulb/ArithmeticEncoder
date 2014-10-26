@@ -17,6 +17,8 @@ class AR_Decoder {
         unsigned long long position;
         AR_Model *model;
 
+        bool bwt;
+
         std::vector<char> data;
 
         AR_symbol getNextSymbol();

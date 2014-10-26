@@ -3,6 +3,6 @@
 
 #include <vector>
 
-std::vector<int> getSections(std::vector<unsigned char> data);
+std::vector<int> getSections(std::vector<char> data);
 
 #endif // DLLPARSER_H

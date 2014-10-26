@@ -13,7 +13,8 @@ const int AR_THIRD_QRT = AR_FIRST_QRT * 3;
 struct header {
     unsigned int ppm:1;
     unsigned int txt:1;
-    unsigned int size:30;
+    unsigned int bwt:1;
+    unsigned int size:29;
 };
 
 class AR_Model

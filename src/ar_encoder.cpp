@@ -5,7 +5,7 @@
 #include "ar_normal_model.h"
 #include "ar_ppm_model.h"
 
-AR_Encoder::AR_Encoder(bool usePPM, bool isTXT) {
+AR_Encoder::AR_Encoder(bool usePPM, bool isTXT, bool BWTused) {
     packed = false;
     low = 0;
     high = AR_MAX_VALUE;
@@ -13,11 +13,12 @@ AR_Encoder::AR_Encoder(bool usePPM, bool isTXT) {
     size = 0;
     ppm = usePPM;
     txt = isTXT;
+    bwt = BWTused;
 
     if (usePPM)
         model = new AR_PPM_Model(txt);
     else
-        model = new AR_Normal_Model();
+        model = new AR_Normal_Model(bwt);
 }
 
 void AR_Encoder::putSymbol(AR_symbol s) {
@@ -93,6 +94,7 @@ std::vector<char> AR_Encoder::convert(const std::vector<bool> &data) {
     header h;
     h.ppm = ppm;
     h.txt = txt;
+    h.bwt = bwt;
     h.size = size;
     res.resize(data.size() / 8 + sizeof(header), 0);
     *(header*)res.data() = h;
