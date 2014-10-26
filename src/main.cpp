@@ -11,6 +11,7 @@
 #include "ar_decoder.h"
 
 #include "dllparser.h"
+#include "bwt.h"
 
 namespace po=boost::program_options;
 
@@ -80,6 +81,17 @@ void decompress(FILE *in, FILE *out) {
 }
 
 int main(int argc, char *argv[]) {
+    std::vector<char> t;
+    for (int i = 0; i < 100; i++)
+        t.push_back(rand());
+
+    std::vector<char> res = BWT_Backward(BWT_Direct(t));
+    for (int i = 0; i < res.size(); i++)
+        if (res[i] != t[i])
+            printf("err %d: %d %d\n", i, res[i], t[i]);
+
+    exit(0);
+
     FILE *fin = fopen(argv[2], "r");
     FILE *fout = fopen(argv[3], "w");
     int ppm = (strcmp(argv[4], "ppm") == 0);

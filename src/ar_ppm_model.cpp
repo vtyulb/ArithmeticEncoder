@@ -23,7 +23,6 @@ void AR_PPM_Model::update(AR_symbol s) {
 
     lastSymbols.push_back(s);
     lastSymbols.pop_front();
-
     cached = false;
     ticks++;
 

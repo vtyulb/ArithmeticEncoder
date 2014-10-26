@@ -21,7 +21,8 @@ SOURCES += main.cpp \
     ar_decoder.cpp \
     ar_ppm_model.cpp \
     ar_normal_model.cpp \
-    dllparser.cpp
+    dllparser.cpp \
+    bwt.cpp
 
 HEADERS += \
     ar_model.h \
@@ -29,4 +30,5 @@ HEADERS += \
     ar_decoder.h \
     ar_ppm_model.h \
     ar_normal_model.h \
-    dllparser.h
+    dllparser.h \
+    bwt.h
