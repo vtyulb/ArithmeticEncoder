@@ -12,7 +12,7 @@ const long long AR_MAX_MEMORY_USAGE = 1000; // in megabytes
 
 struct index {
     int r[AR_PPM_MODEL_ORDER];
-    int order = AR_PPM_MODEL_ORDER;
+    int order;
 
     bool operator < (const index &i) const {
         if (order < i.order)
@@ -27,6 +27,10 @@ struct index {
                 return false;
 
         return false;
+    }
+
+    index() {
+        order = AR_PPM_MODEL_ORDER;
     }
 };
 
