@@ -88,8 +88,8 @@ void decompress(FILE *in, FILE *out) {
 }
 
 int main(int argc, char *argv[]) {
-    FILE *fin = fopen(argv[2], "r");
-    FILE *fout = fopen(argv[3], "w");
+    FILE *fin = fopen(argv[2], "rb");
+    FILE *fout = fopen(argv[3], "wb");
 
     if (argv[1][0] == 'c')
         compress(fin, fout, strstr(argv[4], "ppm") != NULL, strstr(argv[4], "bwt") != NULL);
@@ -121,14 +121,14 @@ int main(int argc, char *argv[]) {
 
     FILE *out;
     if (vm.count("output")) {
-        out = fopen(output.data(), "w");
+        out = fopen(output.data(), "wb");
         assert(out);
     } else
         out = stdout;
 
     FILE *in;
     if (vm.count("input")) {
-        in = fopen(input.data(), "r");
+        in = fopen(input.data(), "rb");
         assert(in);
     } else
         in = stdin;
