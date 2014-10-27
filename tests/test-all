@@ -1,0 +1,5 @@
+#!/bin/bash
+
+./test ari
+./test ppm
+./test ari+bwt

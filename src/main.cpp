@@ -3,9 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
-#include <boost/program_options.hpp>
-#include <boost/algorithm/string.hpp>
+//#include <boost/program_options.hpp>
+//#include <boost/algorithm/string.hpp>
 
 #include "ar_encoder.h"
 #include "ar_decoder.h"
@@ -13,7 +14,7 @@
 #include "dllparser.h"
 #include "bwt.h"
 
-namespace po=boost::program_options;
+//namespace po=boost::program_options;
 
 void showHelp() {
     printf("Arithmetic encoder. Usage:\n");
@@ -44,12 +45,15 @@ void compress(FILE *in, FILE *out, int ppm, int bwt) {
 //        fprintf(stderr, "txt file!");
     }
 
-    std::vector<int> sections = getSections(data);
+    if (data.size() < 100)
+        bwt = false;
 
     AR_Encoder e(ppm, txt, bwt);
 
     if (bwt)
         data = BWT_Direct(data);
+
+    std::vector<int> sections = getSections(data);
 
     for (unsigned i = 0; i < data.size(); i++) {
         if (ppm)

@@ -19,7 +19,7 @@ void AR_Normal_Model::update(AR_symbol s) {
     const int diff = 6 + bwt * 40;
     count++;
 
-    if (qu.size() > 2000 / (bwt * 20 + 1)) {
+    if (qu.size() > 3000 / (bwt * 23 + 1)) {
         _freq[qu.front()] -= diff;
         assert(_freq[qu.front()] > 0);
         qu.pop();

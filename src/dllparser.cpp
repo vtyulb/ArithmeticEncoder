@@ -35,7 +35,8 @@ std::vector<int> getSections(std::vector<char> dataVect) {
     char *data = (char*) dataVect.data();
 
     std::vector<int> res;
-    if (data[0] != 'M' || data[1] != 'Z')
+
+    if (dataVect.size() < 100 || data[0] != 'M' || data[1] != 'Z')
         return res;
 
     int offset = *(int*)(data + 0x3C);

@@ -11,11 +11,6 @@
 std::vector<char> BWT_Direct(std::vector<char> data) {
     int N = data.size();
 
-//    int *p = new int[N];
-//    int *c = new int[N];
-//    int *cnt = new int[N];
-//    int *pn = new int[N];
-//    int *cn = new int[N];
     std::vector<int> p(N), c(N), cnt(256 + N), pn(N), cn(N);
 
     memset(cnt.data(), 0, sizeof(int) * 256);
@@ -41,9 +36,9 @@ std::vector<char> BWT_Direct(std::vector<char> data) {
         for (int i = 0; i < N; i++)
             pn[i] = (p[i] - (1 << stage) + N) % N;
 
-        memset(cnt.data(), 0, sizeof(int) * classes);
+        cnt.assign(classes, 0);
         for (int i = 0; i < N; i++)
-            cnt[c[pn[i]]]++;
+            cnt[c[i]]++;
 
         for (int i = 1; i < N; i++)
             cnt[i] += cnt[i - 1];
@@ -61,7 +56,8 @@ std::vector<char> BWT_Direct(std::vector<char> data) {
 
             cn[p[i]] = classes - 1;
         }
-        memcpy(c.data(), cn.data(), sizeof(int) * N);
+
+        c = cn;
     }
 
     std::vector<char> res;
@@ -79,6 +75,10 @@ std::vector<char> BWT_Direct(std::vector<char> data) {
             printf("err %d: %d %d\n", i, check[i], data[i]);
         }*/
 
+    /*FILE *fout = fopen("virus.txt", "w");
+    fwrite(res.data(), 1, res.size(), fout);
+    fclose(fout);*/
+
     return res;
 }
 
@@ -93,19 +93,13 @@ std::vector<char> BWT_Backward(std::vector<char> data) {
     for (int i = 0; i < data.size(); i++)
         r[(unsigned char)data[i]]++;
 
-    int k = r[0];
-    for (int i = 0; i < 255; i++) {
-        int t = r[i + 1];
-        r[i + 1] += r[i];
-        r[i] -= k;
-        k = t;
-    }
-    r[255] -= k;
+    for (int i = 1; i < 256; i++)
+        r[i] += r[i - 1];
 
     std::vector<int> magic;
     magic.resize(data.size());
-    for (int i = 0; i < data.size(); i++)
-        magic[r[(unsigned char)data[i]]++] = i;
+    for (int i = data.size() - 1; i >= 0; i--)
+        magic[--r[(unsigned char)data[i]]] = i;
 
     std::vector<char> res;
     for (int i = 0; i < data.size(); i++) {
