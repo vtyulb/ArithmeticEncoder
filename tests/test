@@ -8,6 +8,7 @@ rm *.orig
 ./ArithmeticEncoder c libgs.so libgs.ar-$1 $1
 ./ArithmeticEncoder c qt.dll qt.ar-$1 $1
 ./ArithmeticEncoder c empty empty.ar-$1 $1
+./ArithmeticEncoder c idiot.txt idiot.ar-$1 $1
 
 ls -l *$1*
 ls -l *$1* | awk '{ print $5 }' | awk 'BEGIN { rsum = 0 } { rsum += $1 } END { print rsum }'
@@ -18,6 +19,7 @@ ls -l *$1* | awk '{ print $5 }' | awk 'BEGIN { rsum = 0 } { rsum += $1 } END { p
 ./ArithmeticEncoder d war.ar-$1 war.orig
 ./ArithmeticEncoder d qt.ar-$1 qt.orig
 ./ArithmeticEncoder d empty.ar-$1 empty.orig
+./ArithmeticEncoder d idiot.ar-$1 idiot.orig
 
 cmp zel.txt zel.orig
 cmp libgs.so gs.orig
@@ -25,3 +27,4 @@ cmp libpulse.orig libpulse.so
 cmp war.orig war
 cmp qt.dll qt.orig
 cmp empty empty.orig
+cmp idiot.txt idiot.orig
